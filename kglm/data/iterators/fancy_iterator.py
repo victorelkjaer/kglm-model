@@ -56,9 +56,6 @@ class FancyIterator(DataIterator):
         # need to have all of the instances in memory ($$$)
         instance_list = list(instances)
 
-        print(len(instance_list))
-        print(self._batch_size)
-
         if (self._batch_size > len(instance_list)) and self._truncate:
             raise ConfigurationError('FancyIterator will not return any data when the batch size '
                                      'is larger than number of instances and truncation is enabled. '
@@ -114,7 +111,11 @@ class FancyIterator(DataIterator):
     def _split(self, instance: Instance) -> Tuple[List[Instance], int]:
         # Determine the size of the sequence inside the instance.
         true_length = len(instance['source'])
-        padded_length = self._split_size * (true_length // self._split_size + 1)
+        if (true_length % self._split_size) != 0:
+            offset = 1
+        else:
+            offset = 0
+        padded_length = self._split_size * (true_length // self._split_size + offset)
 
         # Determine the split indices.
         split_indices = list(range(0, true_length, self._split_size))
