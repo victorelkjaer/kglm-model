@@ -462,6 +462,7 @@ class KglmDisc(Model):
         target_inds : ``torch.Tensor``
             Either the shortlist inds if using shortlist, otherwise the target entity ids.
         """
+        import pdb; pdb.set_trace()
         logits = self._new_entity_logits(encoded, shortlist)
         if self._use_shortlist:
             # Take masked softmax to get log probabilties and gather the targets.
@@ -478,10 +479,11 @@ class KglmDisc(Model):
         mask = ~target_inds.eq(0)
         target_log_probs[~mask] = 0
 
-        self._new_entity_accuracy(predictions=log_probs[mask],
-                                  gold_labels=target_inds[mask])
-        self._new_entity_accuracy20(predictions=log_probs[mask],
+        if mask.any():
+            self._new_entity_accuracy(predictions=log_probs[mask],
                                     gold_labels=target_inds[mask])
+            self._new_entity_accuracy20(predictions=log_probs[mask],
+                                        gold_labels=target_inds[mask])
 
         return -target_log_probs.sum() / (target_mask.sum() + 1e-13)
 
