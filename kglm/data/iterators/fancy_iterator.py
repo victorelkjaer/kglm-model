@@ -26,6 +26,7 @@ class FancyIterator(DataIterator):
                  splitting_keys: List[str],
                  split_size: int,
                  batch_size: int = 32,
+                 truncate: bool = True,
                  instances_per_epoch: int = None,
                  max_instances_in_memory: int = None,
                  cache_instances: bool = False,
@@ -40,7 +41,7 @@ class FancyIterator(DataIterator):
                 maximum_samples_per_batch=maximum_samples_per_batch)
         self._splitting_keys = splitting_keys
         self._split_size = split_size
-        self._eval = False
+        self._truncate = truncate
 
     def eval(self):
         self._eval = True
@@ -162,7 +163,7 @@ class FancyIterator(DataIterator):
                 except IndexError:  # A queue is depleted
                     # If we're training, we break to avoid densely padded inputs (since this biases
                     # the model to overfit the longer sequences).
-                    if not self._eval:
+                    if self._truncate:
                         return
                     # But if we're evaluating we do want the padding, so that we don't skip anything.
                     else:
