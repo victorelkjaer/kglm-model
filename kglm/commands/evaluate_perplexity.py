@@ -160,7 +160,7 @@ def evaluate_from_args(args: argparse.Namespace) -> Dict[str, Any]:
     iterator_params = config.pop('iterator', 'None')
     iterator = DataIterator.from_params(iterator_params)
     iterator.index_with(model.vocab)
-    iterator.eval()
+    # iterator.eval()
     metrics = evaluate_perplexity(model, sampler, args.num_samples, instances, iterator, args.cuda_device)
 
     logger.info('Finished evaluating.')
