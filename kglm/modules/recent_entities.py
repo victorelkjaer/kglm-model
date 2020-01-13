@@ -34,7 +34,7 @@ class RecentEntities:
 
         Returns
         -------
-        A tuple ``(candidate_ids, candidate_mask)`` containings the following elements:
+        A tuple ``(candidate_ids, candidate_mask)`` containing the following elements:
         candidate_ids : ``torch.LongTensor``
             A tensor of shape ``(batch_size, n_candidates)`` of all of the candidates for each
             batch element.
@@ -110,7 +110,7 @@ class RecentEntities:
             unique = torch.unique(ids, sorted=True)
             all_unique.append(unique)
 
-        # Convert the list to a tensor by adding adequete padding.
+        # Convert the list to a tensor by adding adequate padding.
         batch_size = entity_ids.shape[0]
         max_num_parents = max(unique.shape[0] for unique in all_unique)
         unique_entity_ids = entity_ids.new_zeros(size=(batch_size, max_num_parents))

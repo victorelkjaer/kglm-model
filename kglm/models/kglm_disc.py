@@ -90,7 +90,7 @@ class KglmDisc(Model):
                 input_size = token_embedding_dim
             else:
                 input_size = hidden_size
-            if (i == num_layers - 1):
+            if i == num_layers - 1:
                 output_size = token_embedding_dim + 2 * entity_embedding_dim
             else:
                 output_size = hidden_size
@@ -119,7 +119,7 @@ class KglmDisc(Model):
         self._avg_mention_type_loss = Average()
         self._avg_new_entity_loss = Average()
         self._avg_knowledge_graph_entity_loss = Average()
-        self._new_mention_f1 =  F1Measure(positive_label=1)
+        self._new_mention_f1 = F1Measure(positive_label=1)
         self._kg_mention_f1 = F1Measure(positive_label=2)
         self._new_entity_accuracy = CategoricalAccuracy()
         self._new_entity_accuracy20 = CategoricalAccuracy(top_k=20)
@@ -157,7 +157,7 @@ class KglmDisc(Model):
         logp = 0.0
 
         mask = get_text_field_mask(target).byte()
-        # We encode the target tokens (**not** source) since the discriminitative model makes
+        # We encode the target tokens (**not** source) since the discriminative model makes
         # predictions on the current token, but the generative model expects labels for the
         # **next** (e.g. target) token!
         encoded, *_ = self._encode_source(target['tokens'])
@@ -216,11 +216,12 @@ class KglmDisc(Model):
         derived_entity_logp = 0.0
 
         sequence_length = target['tokens'].shape[1]
+
         for i in range(sequence_length):
 
             current_mask = derived_entity_mask[:, i] & mask[:, i]
 
-            ## SAMPLE PARENTS ##
+            # -------------------  SAMPLE PARENTS ---------------------
 
             # Update recent entities with **current** entity only
             current_entity_id = entity_ids[:, i].unsqueeze(1)
@@ -238,7 +239,7 @@ class KglmDisc(Model):
             selection_logits = torch.bmm(current_head_encoding, candidate_embeddings.transpose(1, 2))
             selection_probs = masked_softmax(selection_logits, candidate_mask)
 
-            # Only sample if the is at least one viable candidate (e.g. if a sampling distribution
+            # Only sample if there is at least one viable candidate (e.g. if a sampling distribution
             # has no probability mass we cannot sample from it). Return zero as the parent for
             # non-viable distributions.
             viable_candidate_mask = candidate_mask.any(-1).squeeze()
@@ -256,7 +257,7 @@ class KglmDisc(Model):
             parent_ids[current_mask, i] = _parent_ids[current_mask]  # TODO: Double-check
             derived_entity_logp += parent_logp[current_mask].sum()
 
-            ## SAMPLE RELATIONS ##
+            # ---------------------- SAMPLE RELATION -----------------------------
 
             # Lookup sampled parent ids in the knowledge graph
             indices, parent_ids_list, relations_list, tail_ids_list = self._knowledge_graph_lookup(_parent_ids)
@@ -294,9 +295,9 @@ class KglmDisc(Model):
 
             self._recent_entities.insert(_tail_ids, current_mask)
 
-            ## CONTINUE MENTIONS ##
+            # --------------------- CONTINUE MENTIONS ---------------------------------------
             continue_mask = mention_type[:, i].eq(3) & mask[:, i]
-            if not current_mask.any() or i==0:
+            if not current_mask.any() or i == 0:
                 continue
             raw_entity_ids[continue_mask, i] = raw_entity_ids[continue_mask, i-1]
             entity_ids[continue_mask, i] = entity_ids[continue_mask, i-1]
@@ -306,7 +307,8 @@ class KglmDisc(Model):
                 shortlist_inds[continue_mask, i] = shortlist_inds[continue_mask, i-1]
             alias_copy_inds[continue_mask, i] = alias_copy_inds[continue_mask, i-1]
 
-        # Lastly, because entities won't always match the true entity ids, we need to zero out any alias copy ids that won't be valid.
+        # Lastly, because entities won't always match the true entity ids,
+        # we need to zero out any alias copy ids that won't be valid.
         true_raw_entity_ids = kwargs['raw_entity_ids']['raw_entity_ids']
         invalid_id_mask = ~true_raw_entity_ids.eq(raw_entity_ids)
         alias_copy_inds[invalid_id_mask] = 0
@@ -671,8 +673,8 @@ class KglmDisc(Model):
     def train(self, mode=True):
         # TODO: This is a temporary hack to ensure that the internal state resets when the model
         # switches from training to evaluation. The complication arises from potentially differing
-        # batch sizes (e.g. the `reset` tensor will not be the right size). In future
-        # implementations this should be handled more robustly.
+        # batch sizes (e.g. the `reset` tensor will not be the right size).
+        # In future implementations this should be handled more robustly.
         super().train(mode)
         self._state = None
 

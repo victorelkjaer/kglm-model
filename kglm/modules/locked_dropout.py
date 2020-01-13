@@ -1,5 +1,6 @@
 import torch
 
+
 class LockedDropout(torch.nn.Module):
     def forward(self,  # pylint: disable=arguments-differ
                 x: torch.Tensor,

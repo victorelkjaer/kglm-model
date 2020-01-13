@@ -127,6 +127,7 @@ def evaluate_perplexity(model: Model,
     metrics = {'ppl': ppl, 'upp': upp}
     return metrics
 
+
 def evaluate_from_args(args: argparse.Namespace) -> Dict[str, Any]:
     # Disable some of the more verbose logging statements
     logging.getLogger('allennlp.common.params').disabled = True

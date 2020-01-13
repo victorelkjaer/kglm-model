@@ -101,7 +101,7 @@ class EntityNLMDiscriminator(Model):
                 entity_types: Optional[torch.Tensor] = None,
                 entity_ids: Optional[torch.Tensor] = None,
                 mention_lengths: Optional[torch.Tensor] = None,
-                reset: bool = False)-> Dict[str, torch.Tensor]:
+                reset: bool = False) -> Dict[str, torch.Tensor]:
         """
         Computes the loss during training / validation.
 
