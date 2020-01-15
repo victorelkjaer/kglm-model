@@ -203,7 +203,7 @@ class KglmDisc(Model):
         entity_ids = torch.zeros_like(target['tokens'])
         entity_ids[new_entity_mask] = new_entity_samples[new_entity_mask]
 
-        # ...UGH... we also need the raw ids - remapping time
+        # ...UGH we also need the raw ids - remapping time
         raw_entity_ids = torch.zeros_like(target['tokens'])
         for *index, entity_id in nested_enumerate(entity_ids.tolist()):
             token = self.vocab.get_token_from_index(entity_id, 'entity_ids')
@@ -552,7 +552,7 @@ class KglmDisc(Model):
         # Embed relations
         relation_embeddings = [self._relation_embedder(r) for r in relations_list]
 
-        # Logits are computed using a general bilinear form that measures the similarity between
+        # Logits are computed using a general bi-linear form that measures the similarity between
         # the projected hidden state and the embeddings of relations
         encoded = self._locked_dropout(encoded_relation, self._dropout)
 

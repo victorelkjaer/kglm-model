@@ -150,6 +150,7 @@ class _PredictManager:
         if self._output_file is not None:
             self._output_file.close()
 
+
 def _predict(args: argparse.Namespace) -> None:
     predictor = _get_predictor(args)
 

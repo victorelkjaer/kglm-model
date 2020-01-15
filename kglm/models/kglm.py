@@ -93,7 +93,7 @@ class Kglm(Model):
                 input_size = token_embedding_dim
             else:
                 input_size = hidden_size
-            if (i == num_layers - 1):
+            if i == num_layers - 1:
                 output_size = token_embedding_dim + 2 * entity_embedding_dim
             else:
                 output_size = hidden_size
@@ -192,7 +192,7 @@ class Kglm(Model):
 
         return new_entity_ids, shortlist_inds
 
-    def get_raw_entity_ids(self, entity_ids: torch.LongTensor) ->  torch.LongTensor:
+    def get_raw_entity_ids(self, entity_ids: torch.LongTensor) -> torch.LongTensor:
         raw_entity_ids = torch.zeros_like(entity_ids)
         for *index, entity_id in nested_enumerate(entity_ids.tolist()):
             token = self.vocab.get_token_from_index(entity_id, 'entity_ids')
@@ -221,7 +221,7 @@ class Kglm(Model):
             current_entity_id = new_entity_ids[:, i].unsqueeze(1)
             candidate_ids, candidate_mask = self._recent_entities(current_entity_id)
 
-            # Mask indicates whether to predict at this timestep
+            # Mask indicates whether to predict at this time-step
             current_mask = mask[:, i]
             if not current_mask.any():
                 continue
@@ -232,11 +232,12 @@ class Kglm(Model):
             current_raw_tail_ids = torch.zeros_like(current_entity_id)
             current_tail_ids = torch.zeros_like(current_entity_id)
 
-            ### SAMPLE PARENT IDS ###
+            # ------------------- SAMPLE PARENT IDS ------------------------------------
             current_encoded_head = encoded_head[:, i].unsqueeze(1)
             candidate_embeddings = self._entity_embedder(candidate_ids)
             selection_logits = torch.bmm(current_encoded_head, candidate_embeddings.transpose(1, 2))
             selection_probs = masked_softmax(selection_logits, candidate_mask)
+
             # Only sample if the is at least one viable candidate. Return zero for non-viable
             # distributions.
             viable_candidate_mask = candidate_mask.any(-1).squeeze()
@@ -248,7 +249,7 @@ class Kglm(Model):
                 current_parent_ids[viable_candidate_mask] = viable_parent_ids
             parent_ids[current_mask, i] = current_parent_ids[current_mask].squeeze(-1)
 
-            ## SAMPLE RELATIONS ##
+            # -------------------  SAMPLE RELATIONS  -----------------------------------
             current_encoded_relation = encoded_relation[:, i].unsqueeze(1)
             # Look up parents in the knowledge graph
             indices, _, relations_list, tail_ids_list = self._knowledge_graph_lookup(current_parent_ids)
@@ -433,7 +434,6 @@ class Kglm(Model):
                 source=source,
                 alias_database=alias_database,
                 shortlist=shortlist)
-
 
         return output_dict
 
@@ -945,8 +945,8 @@ class Kglm(Model):
 
         return copy_scores
 
-    def _vocab_logp(self,
-                    generate_scores: torch.Tensor,
+    @staticmethod
+    def _vocab_logp(generate_scores: torch.Tensor,
                     copy_scores: torch.Tensor,
                     alias_indices: torch.Tensor) -> torch.Tensor:
         batch_size, sequence_length, vocab_size = generate_scores.shape
@@ -981,7 +981,7 @@ class Kglm(Model):
 
         log_probs = self._vocab_logp(generate_scores, copy_scores, alias_indices)
 
-        # GENERATE LOSS ###
+        # ------------------------- GENERATE LOSS -----------------------------------------
         # The generated token loss is a simple cross-entropy calculation, we can just gather
         # the log probabilties...
         flattened_log_probs = log_probs.view(batch_size * sequence_length, -1)
@@ -1022,7 +1022,7 @@ class Kglm(Model):
         penalized_log_probs[~flattened_mask] = 0
         penalized_vocab_loss = -penalized_log_probs.sum() / (mask.sum() + 1e-13)
 
-        # PERPLEXITY ###
+        # ------------------------- PERPLEXITY --------------------------------------------------------
         # Our perplexity terms are computed using the log probs computed w.r.t the source
         # vocabulary.
         combined_log_probs_source_vocab = torch.cat((generate_log_probs_source_vocab,
@@ -1085,7 +1085,7 @@ class Kglm(Model):
         out['new_p'] = p
         out['new_r'] = r
         out['new_f1'] = f
-        p, r, f  = self._kg_mention_f1.get_metric(reset)
+        p, r, f = self._kg_mention_f1.get_metric(reset)
         out['kg_p'] = p
         out['kg_r'] = r
         out['kg_f1'] = f
