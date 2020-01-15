@@ -11,7 +11,7 @@ from kglm.data.dataset_readers.enhanced_wikitext import EnhancedWikitextKglmRead
     EnhancedWikitextSimpleKglmReader, EnhancedWikitextReader, EnhancedWikitextEntityNlmReader
 from kglm.data.fields.global_object import GlobalObject
 from kglm.data.fields.sequential_array import SequentialArrayField
-from kglm.data.iterators.fancy_iterator import FancyIterator,
+from kglm.data.iterators.fancy_iterator import FancyIterator
 from kglm.data.alias_database import AliasDatabase
 from kglm.data.extended_vocabulary import ExtendedVocabulary
 from kglm.models.kglm import Kglm
