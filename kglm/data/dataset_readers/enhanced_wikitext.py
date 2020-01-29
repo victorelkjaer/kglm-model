@@ -186,8 +186,10 @@ class EnhancedWikitextKglmReader(DatasetReader):
                 source = tokens[:-1]
                 if self._mode == 'generative':
                     target = tokens[1:]
+                    alias_copy_inds = np.zeros(shape=(len(source),))
                 else:
                     target = None
+                    alias_copy_inds = None
 
                 # Process annotations
                 if 'annotations' not in data:
@@ -212,10 +214,6 @@ class EnhancedWikitextKglmReader(DatasetReader):
                     shortlist_inds = np.zeros(shape=(len(source),))
                     mention_type = np.zeros(shape=(len(source),))
 
-                    if self._mode == "generative":
-                        alias_copy_inds = np.zeros(shape=(len(source),))
-                    else:
-                        alias_copy_inds = None
 
                     # Process annotations
                     for annotation in data['annotations']:
