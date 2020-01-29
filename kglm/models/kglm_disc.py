@@ -309,9 +309,10 @@ class KglmDisc(Model):
 
         # Lastly, because entities won't always match the true entity ids,
         # we need to zero out any alias copy ids that won't be valid.
-        true_raw_entity_ids = kwargs['raw_entity_ids']['raw_entity_ids']
-        invalid_id_mask = ~true_raw_entity_ids.eq(raw_entity_ids)
-        alias_copy_inds[invalid_id_mask] = 0
+        if 'raw_entity_ids' in kwargs:
+            true_raw_entity_ids = kwargs['raw_entity_ids']['raw_entity_ids']
+            invalid_id_mask = ~true_raw_entity_ids.eq(raw_entity_ids)
+            alias_copy_inds[invalid_id_mask] = 0
 
         # Pass denotes fields that are passed directly from input to output.
         sample = {

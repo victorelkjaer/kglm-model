@@ -200,7 +200,7 @@ class Kglm(Model):
             raw_entity_ids[tuple(index)] = raw_entity_id
         return raw_entity_ids
 
-    def predict_knowledge_graph_entities(self,
+    def predict_knowledge_graph_entities(self,                                  # pylint: disable-arguments
                                          encoded_head: torch.FloatTensor,
                                          encoded_relation: torch.FloatTensor,
                                          new_entity_ids: torch.LongTensor,
@@ -529,11 +529,11 @@ class Kglm(Model):
 
         return {'loss': loss, 'logp': logp, 'penalized_logp': penalized_logp}
 
-
     def _greedy_decode(self,
                        source: Dict[str, torch.Tensor],
                        alias_database: AliasDatabase,
                        shortlist: Dict[str, torch.Tensor] = None) -> Dict[str, Any]:
+
         # Get the token mask and extract indexed text fields.
         # shape: (batch_size, sequence_length)
         mask = get_text_field_mask(source)
@@ -643,7 +643,7 @@ class Kglm(Model):
             raw_entity_id = output['raw_entity_id']
             alias_database = output['alias_database']
 
-            # Seperate generate from copy probs
+            # Separate generate from copy probs
             vocab_size = self.vocab.get_vocab_size('tokens')
             generate_probs = word_probs[:vocab_size]
             copy_probs = word_probs[vocab_size:]
@@ -730,7 +730,6 @@ class Kglm(Model):
         logits = self._fc_mention_type(encoded)
         mention_loss = sequence_cross_entropy_with_logits(logits, mention_type, mask,
                                                           average='token')
-
 
         # if not self.training:
         self._new_mention_f1(predictions=logits,
