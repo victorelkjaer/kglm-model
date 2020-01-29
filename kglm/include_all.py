@@ -1,5 +1,6 @@
 from allennlp.models.archival import load_archive
 from allennlp.models import Model
+from allennlp.predictors import Predictor
 
 import json
 
@@ -34,7 +35,7 @@ class ModelArchiveFromParams(Model):
     Loads a model from an archive
     """
     @classmethod
-    def from_params(cls, vocab=None, params=None):
+    def from_params(cls, vocab=None, params=None, overrides=None):
         """
         {"type": "from_archive", "archive_file": "path to archive",
          "overrides:" .... }
@@ -42,7 +43,7 @@ class ModelArchiveFromParams(Model):
         "overrides" omits the "model" key
         """
         archive_file = params.pop("archive_file")
-        overrides = params.pop("overrides", None)
+        # overrides = params.pop("overrides", None)
         params.assert_empty("ModelArchiveFromParams")
         if overrides is not None:
             archive = load_archive(archive_file, overrides=json.dumps(overrides))
