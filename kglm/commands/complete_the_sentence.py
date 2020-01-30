@@ -15,6 +15,7 @@ from allennlp.data import Instance
 
 from kglm.predictors import CompleteTheSentencePredictor
 
+
 class CompleteTheSentence(Subcommand):
     def add_subparser(self, name: str, parser: argparse._SubParsersAction) -> argparse.ArgumentParser:
         # pylint: disable=protected-access

@@ -68,37 +68,6 @@ class FactCompletionPredictor(Predictor):
                                                  dataset_reader_model,
                                                  dataset_reader_sampler)
 
-    @classmethod
-    @overrides
-    def from_params(cls,
-                    generative_archive: Archive,
-                    discriminative_archive: Archive,
-                    predictor_name: str = None) -> 'Predictor':
-        """
-        Instantiate a :class:`CompleteTheSentencePredictor` from a :class:`~allennlp.models.archival.Archive`;
-        that is, from the result of training a model. Optionally specify which `Predictor`
-        subclass; otherwise, the default one for the model will be used.
-        """
-        # We need to duplicate the configs so that they do not get consumed inside the archive
-        generative_config = generative_archive.config.duplicate()
-        discriminative_config = discriminative_archive.config.duplicate()
-
-        model = generative_archive.model
-        sampler = discriminative_archive.model
-
-        dataset_reader_params_model = generative_config['dataset_reader']
-        dataset_reader_params_sampler = discriminative_config['dataset_reader']
-
-        dataset_reader_model = DatasetReader.from_params(dataset_reader_params_model)
-        dataset_reader_sampler = DatasetReader.from_params(dataset_reader_params_sampler)
-
-        model.eval()
-        sampler.eval()
-
-        return Predictor.by_name(predictor_name)(model, sampler,
-                                                 dataset_reader_model,
-                                                 dataset_reader_sampler)
-
     @overrides
     def _json_to_instance(self, json_dict: JsonDict) -> Instance:
         """
@@ -106,8 +75,6 @@ class FactCompletionPredictor(Predictor):
         instance we return a conditioning instance (to warm up the model), and then a generative
         instance (e.g. the token to predict on).
         """
-        ### Conditioning Instance ###
-        # TODO: This is totally broken...
 
         # Manually add the start token
         tokens = ['@@START@@', * json_dict['prefix']]

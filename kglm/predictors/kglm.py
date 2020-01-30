@@ -12,7 +12,6 @@ from kglm.data.dataset_readers.enhanced_wikitext import _flatten, _tokenize, nor
 
 MAX_PARENTS = 10
 
-
 @Predictor.register('kglm')
 class KglmPredictor(Predictor):
 
@@ -88,7 +87,7 @@ class KglmPredictor(Predictor):
                 relation = annotation['relation']
                 new_entity = relation == ['@@NEW@@']
 
-                # If neccessary, update the shortlist. Obtain the index of the entity identifier in
+                # If necessary, update the shortlist. Obtain the index of the entity identifier in
                 # the shortlist.
                 if entity_id not in reverse_shortlist:
                     reverse_shortlist[entity_id] = len(reverse_shortlist)
@@ -103,7 +102,7 @@ class KglmPredictor(Predictor):
                 span = annotation['span']
                 eos_offset_adjusted_span = tuple(i + eos_offset[i] for i in span)
                 for i in range(*eos_offset_adjusted_span):
-                    raw_entity_ids[i+mode_offset] = raw_entity_id
+                    raw_entity_ids[i + mode_offset] = raw_entity_id
                     entity_ids[i+mode_offset] = entity_id
                     mention_type[i+mode_offset] = 3
                     if new_entity:
@@ -132,6 +131,7 @@ class KglmPredictor(Predictor):
             shortlist_inds,
             mention_type,
             alias_copy_inds)
+
         reset = SequentialArrayField(np.array(1), dtype=np.uint8)
         instance.add_field('reset', reset)
         return instance

@@ -22,22 +22,26 @@ logger = logging.getLogger(__name__)
 
 @Predictor.register('complete-the-sentence')
 class CompleteTheSentencePredictor(Predictor):
-    def __init__(self, model: Model, dataset_reader: DatasetReader):
+    def __init__(self,
+                 model: Model,
+                 dataset_reader: DatasetReader) -> None:
         logger.warning('CompleteTheSentencePredictor is meant to be used with '
                        '`kglm.run complete-the-sentence`, if you are using '
                        '`allennlp predict` then results may be incorrect.')
+        logger.warning('The dataset reader used should be created in `generative` mode.'
+                       'This is required since the discriminative model will generate'
+                       'for the generative model to use.')
         self._model = model
         self._dataset_reader = dataset_reader
 
     @overrides
-    def _json_to_instance(self, json_dict: JsonDict) -> Instance:
+    def _json_to_instance(self, json_dict: JsonDict) -> Tuple[Instance, Instance]:
         """
         We need to break with the Predictor expectations slightly, instead of returning a single
         instance we return a conditioning instance (to warm up the model), and then a generative
         instance (e.g. the token to predict on).
         """
-        ### Conditioning Instance ###
-        # TODO: This is totally broken...
+        # Conditioning Instance
 
         # Manually add the start token
         tokens = ['@@START@@', *json_dict['prefix']]
@@ -55,6 +59,7 @@ class CompleteTheSentencePredictor(Predictor):
         # }]
         # data = {'tokens': [tokens], 'annotations': annotations}
         # conditioning_instance = self._dataset_reader.text_to_instance(data)
+
         conditioning_instance = self._dataset_reader.text_to_instance(tokens[:-1])
 
         # Manually add the reset field here
@@ -69,28 +74,32 @@ class CompleteTheSentencePredictor(Predictor):
                 token_indexers=self._dataset_reader._entity_indexers)
             conditioning_instance.fields['shortlist'] = field
 
-        ### Generative Instance ###
-
+        # Generative Instance
         # data = {'tokens': [[tokens[-1]]]}
         # generative_instance = self._dataset_reader.text_to_instance(data)
         generative_instance = self._dataset_reader.text_to_instance([tokens[-1]])
         # Manually add the reset field here
         reset = SequentialArrayField(np.array(0), dtype=np.uint8)
         generative_instance.add_field('reset', reset)
+
         if 'shortlist' in json_dict:
             generative_instance.add_field('shortlist', conditioning_instance.fields['shortlist'])
 
         return conditioning_instance, generative_instance
 
     @overrides
-    def predict_instance(self, instances: Tuple[Instance, Instance]) -> JsonDict:
+    def predict_instance(self,
+                         instances: Tuple[Instance, Instance],
+                         num_samples: int = 100
+                         ) -> JsonDict:
+
         conditioning_instance, generative_instance = instances
 
         self._model.eval()
 
         with torch.no_grad():
             # TODO: Make this a parameter somewhere
-            num_samples = 100
+            num_samples = num_samples
 
             # Duplicate instances (to sample in parallel)
             cuda_device = self._model._get_prediction_device()
@@ -152,7 +161,7 @@ class CompleteTheSentencePredictor(Predictor):
             entity = vocab.get_token_from_index(raw_entity_id.item(), 'raw_entity_ids')
             try:
                 id_map = alias_database._id_map_lookup[entity]
-            except:
+            except KeyError:
                 logger.warning('Error could not find id map for entity "%s"', entity)
                 continue
             reverse_id_map = {i: x for x, i in id_map.items()}

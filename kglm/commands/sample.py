@@ -25,7 +25,9 @@ from kglm.data import AliasDatabase
 
 logger = logging.getLogger(__name__)
 
+
 class Sample(Subcommand):
+
     def add_subparser(self, name: str, parser: argparse._SubParsersAction) -> argparse.ArgumentParser:
         # pylint: disable=protected-access
         description = '''Generate samples from the model'''

@@ -71,6 +71,7 @@ def evaluate_perplexity(model: Model,
                         instances: Iterator[Instance],
                         data_iterator: DataIterator,
                         cuda_device: int) -> Dict[str, Any]:
+
     check_for_gpu(cuda_device)
 
     logger.info('Iterating over dataset')
