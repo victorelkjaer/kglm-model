@@ -1,18 +1,17 @@
 # Python
-
 *.pyc
 __pycache__
 .venv/
 
 
 # Testing
-
 .pytest_cache/
 .mypy_cache/
 
 # Dev
-
 .vscode/
+.idea
+*.iml
 
 # AlleNLP
 results/
