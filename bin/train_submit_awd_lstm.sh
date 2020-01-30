@@ -1,15 +1,15 @@
 #!/bin/bash
 ### General options 
 #BSUB -q gpuv100
-#BSUB -J kglm-generative
+#BSUB -J awd-lstm
 #BSUB -n 1 
 #BSUB -gpu "num=1:mode=exclusive_process"
 #BSUB -R "rusage[mem=16GB]"
 #BSUB -M 16GB
 #BSUB -W 23:59 
 ##BSUB -u s144086@student.dtu.dk
-#BSUB -o Output_final.out 
-#BSUB -e Error_final.err 
+#BSUB -o Output_awd-lstm.out 
+#BSUB -e Error_awd-lstm.err 
 
 # required modules
 module load cuda/9.0
@@ -37,22 +37,17 @@ source activate kglm
 
 export LD_LIBRARY_PATH=/appl/python/3.6.2/lib/
 
-# train on single GPU
 DEVICE=0
-
-SAVE_PATH=/work1/s144086/kglm/generative_models/skytsengel
+EXPERIMENT=/zhome/9e/7/97809/thesis/kglm-model/experiments/awd-lstm-lm.jsonnet
+SAVE_PATH=/work1/s144086/kglm/awd-lstm
 
 if [ -d $SAVE_PATH ]
 then
-    echo "Serialisation directory already axists.. Recovering from previous training session"
-    echo "From: $SAVE_PATH"
+    echo "Serialisation Path Already Exists.. Recovering from previous training session"
     RECOVER=--recover
-    EXPERIMENT=$SAVE_PATH/config.json
 else
     echo "Starting Training from scratch"
-    echo "Saving output to $SAVE_PATH"
     RECOVER=
-    EXPERIMENT=/zhome/9e/7/97809/thesis/kglm-model/experiments/kglm.jsonnet
 fi
 
 
